@@ -25,8 +25,6 @@
 
 - `requirements.txt`: Python package dependencies.
 
-- `environment.yml`: Conda environment configuration.
-
 - `setup.sh`: Shell script for setting up the project environment.
 
 - `.gitignore`: Specifies intentionally untracked files to ignore.
@@ -44,5 +42,5 @@
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/yourusername/SkiSnow.git
+   git clone https://github.com/SamYatesSmith/SkiSnow.git
    cd SkiSnow
