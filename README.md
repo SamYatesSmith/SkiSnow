@@ -35,7 +35,7 @@
 
 - Python 3.9+
 - Git
-- Conda (optional but recommended)
+- Virtual Environment (venv)
 
 ### Installation
 
