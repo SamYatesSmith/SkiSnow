@@ -1,104 +1,105 @@
-import openmeteo_requests
-import requests_cache
-import pandas as pd
-from retry_requests import retry
+# src/data/fetch_data.py
+
 import os
+import pandas as pd
+from meteostat import Stations, Daily
+from datetime import datetime
 import time
+import numpy as np
+import sys
 
-# Setup the Open-Meteo API client with cache and retry
-cache_session = requests_cache.CachedSession('.cache', expire_after=3600)
-retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
-openmeteo = openmeteo_requests.Client(session=retry_session)
+# Import existing processing functions
+from src.data.processing import normalize_name, standardize_columns
 
-# List of resorts and their coordinates
-resorts = [
-    {'name': 'Chamonix', 'latitude': 45.9237, 'longitude': 6.8694, 'country': 'French Alps'},
-    {'name': 'Val D\'Isère & Tignes', 'latitude': 45.5608, 'longitude': 6.5833, 'country': 'French Alps'},
-    {'name': 'Les Trois Vallées', 'latitude': 45.6000, 'longitude': 6.6200, 'country': 'French Alps'},
-    {'name': 'St. Anton', 'latitude': 47.1298, 'longitude': 11.2655, 'country': 'Austrian Alps'},
-    {'name': 'Kitzbühel', 'latitude': 47.4475, 'longitude': 12.3853, 'country': 'Austrian Alps'},
-    {'name': 'Sölden', 'latitude': 46.9871, 'longitude': 11.0050, 'country': 'Austrian Alps'},
-    {'name': 'Zermatt', 'latitude': 46.0207, 'longitude': 7.7491, 'country': 'Swiss Alps'},
-    {'name': 'St. Moritz', 'latitude': 46.4900, 'longitude': 9.8350, 'country': 'Swiss Alps'},
-    {'name': 'Verbier', 'latitude': 46.0985, 'longitude': 7.2261, 'country': 'Swiss Alps'},
-    {'name': 'Cortina d\'Ampezzo', 'latitude': 46.5394, 'longitude': 12.1356, 'country': 'Italian Alps'},
-    {'name': 'Val Gardena', 'latitude': 46.5519, 'longitude': 11.7602, 'country': 'Italian Alps'},
-    {'name': 'Sestriere', 'latitude': 45.4881, 'longitude': 7.6942, 'country': 'Italian Alps'},
-    {'name': 'Kranjska Gora', 'latitude': 46.3998, 'longitude': 13.6772, 'country': 'Slovenian Alps'},
-    {'name': 'Mariborsko Pohorje', 'latitude': 46.5500, 'longitude': 15.8000, 'country': 'Slovenian Alps'},
-    {'name': 'Krvavec', 'latitude': 46.2194, 'longitude': 14.0958, 'country': 'Slovenian Alps'}
-]
-
-# Date range for historical data
-start_date = '2019-09-01'
-end_date = '2024-06-01'
-
-# Key parameters for skiing conditions
-daily_params = ["temperature_2m_max", "temperature_2m_min", "rain_sum", "snowfall_sum"]
-
-# Directory to store the data
-data_dir = 'data/raw/cds'
-
-# Function to fetch data for a single resort
-def fetch_resort_data(resort):
-    name = resort['name']
-    lat = resort['latitude']
-    lon = resort['longitude']
-    country = resort['country']
+def get_nearest_station(latitude, longitude, start_year, end_year):
+    """
+    Find the nearest weather station to the given coordinates with available data.
     
-    print(f"Fetching data for {name} in {country}...")
-
-    # Constructing API URL
-    base_url = 'https://historical-forecast-api.open-meteo.com/v1/forecast'
+    Parameters:
+    - latitude (float): Latitude of the location.
+    - longitude (float): Longitude of the location.
+    - start_year (int): Starting year for data retrieval.
+    - end_year (int): Ending year for data retrieval.
     
-    params = {
-        'latitude': lat,
-        'longitude': lon,
-        'start_date': start_date,
-        'end_date': end_date,
-        'daily': daily_params,
-        'wind_speed_unit': "mph",
-        'precipitation_unit': "inch",
-        'timezone': 'auto'
-    }
+    Returns:
+    - str or None: Station ID if found, else None.
+    """
+    # Define the time period
+    start = datetime(start_year, 1, 1)
+    end = datetime(end_year, 12, 31)
     
-    # Fetch the data from the API
-    response = openmeteo.weather_api(base_url, params=params)
+    # Search for stations nearby
+    stations = Stations()
+    stations = stations.nearby(latitude, longitude)
     
-    if response:
-        # Process daily data
-        daily = response[0].Daily()
-        daily_data = {
-            "date": pd.date_range(
-                start=pd.to_datetime(daily.Time(), unit="s", utc=True),
-                end=pd.to_datetime(daily.TimeEnd(), unit="s", utc=True),
-                freq=pd.Timedelta(seconds=daily.Interval()),
-                inclusive="left"
-            ),
-            "temperature_2m_max": daily.Variables(0).ValuesAsNumpy(),
-            "temperature_2m_min": daily.Variables(1).ValuesAsNumpy(),
-            "rain_sum": daily.Variables(2).ValuesAsNumpy(),
-            "snowfall_sum": daily.Variables(3).ValuesAsNumpy()
-        }
-        
-        # Convert to DataFrame and save to CSV
-        df = pd.DataFrame(daily_data)
-        resort_dir = os.path.join(data_dir, country.replace(' ', '_').lower(), name.replace(' ', '_').lower())
-        if not os.path.exists(resort_dir):
-            os.makedirs(resort_dir)
-        file_path = os.path.join(resort_dir, f"{name.replace(' ', '_').lower()}.csv")
-        df.to_csv(file_path, index=False)
-        print(f"Data for {name} saved to {file_path}")
+    # Filter stations with daily data availability
+    stations = stations.inventory('daily', (start, end))
+    
+    # Fetch the nearest station
+    station = stations.fetch(1)
+    
+    if not station.empty:
+        return station.index[0]
     else:
-        print(f"Failed to fetch data for {name}")
+        return None
 
-# Fetch data for all resorts
-def fetch_all_resorts():
-    for resort in resorts:
-        fetch_resort_data(resort)
-        time.sleep(65) # Introduce a 65-second delay to avoid rate limits
+def download_meteostat_data(resort_name, latitude, longitude, start_year, end_year, output_dir):
+    """
+    Download daily weather data for the specified resort using Meteostat.
+    
+    Parameters:
+    - resort_name (str): Name of the resort.
+    - latitude (float): Latitude of the resort.
+    - longitude (float): Longitude of the resort.
+    - start_year (int): Starting year for data retrieval.
+    - end_year (int): Ending year for data retrieval.
+    - output_dir (str): Directory to save the downloaded CSV file.
+    
+    Returns:
+    - None
+    """
+    # Find the nearest station
+    station_id = get_nearest_station(latitude, longitude, start_year, end_year)
+    
+    if not station_id:
+        print(f"No station found for {resort_name} at ({latitude}, {longitude}).")
+        return
+    
+    print(f"Nearest station for {resort_name}: {station_id}")
+    
+    # Define the time period
+    start = datetime(start_year, 1, 1)
+    end = datetime(end_year, 12, 31)
+    
+    # Fetch daily data
+    data = Daily(station_id, start, end)
+    data = data.fetch()
+    
+    if data.empty:
+        print(f"No data available for {resort_name} from {start_year} to {end_year}.")
+        return
+    
+    # Select required variables and rename them
+    data = data[['tmin', 'tmax', 'prcp', 'snow']]
+    data = data.rename(columns={
+        'tmin': 'temperature_min',
+        'tmax': 'temperature_max',
+        'prcp': 'precipitation_sum',
+        'snow': 'snow_depth'
+    })
+    
+    # Reset index to have 'time' as a column
+    data = data.reset_index()
+    
+    # Define the output file path
+    os.makedirs(output_dir, exist_ok=True)
+    file_name = f"{resort_name.replace('/', '_')}_1990_2023.csv"  # Adjust years as needed
+    file_path = os.path.join(output_dir, file_name)
+    
+    # Save to CSV if not already present
+    if not os.path.exists(file_path):
+        data.to_csv(file_path, index=False)
+        print(f"Data for {resort_name} saved to {file_path}.")
+    else:
+        print(f"Data for {resort_name} from 1990 to 2023 already exists at {file_path}.")
 
-# Start data fetching process
-fetch_all_resorts()
-
-print("Data fetching completed.")
