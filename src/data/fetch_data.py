@@ -1,5 +1,3 @@
-# src/data/fetch_data.py
-
 import os
 import pandas as pd
 from meteostat import Stations, Daily
@@ -91,15 +89,7 @@ def download_meteostat_data(resort_name, latitude, longitude, start_year, end_ye
     # Reset index to have 'time' as a column
     data = data.reset_index()
     
-    # Define the output file path
-    os.makedirs(output_dir, exist_ok=True)
-    file_name = f"{resort_name.replace('/', '_')}_1990_2023.csv"  # Adjust years as needed
-    file_path = os.path.join(output_dir, file_name)
-    
-    # Save to CSV if not already present
-    if not os.path.exists(file_path):
-        data.to_csv(file_path, index=False)
-        print(f"Data for {resort_name} saved to {file_path}.")
-    else:
-        print(f"Data for {resort_name} from 1990 to 2023 already exists at {file_path}.")
+    # Instead of saving to CSV, return the DataFrame
+    print(f"Data for {resort_name} fetched successfully.")
+    return data
 

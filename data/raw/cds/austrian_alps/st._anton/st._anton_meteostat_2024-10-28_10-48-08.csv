@@ -1,4 +1,4 @@
-time,temperature_min,temperature_max,precipitation_sum,snow_depth
+date,temperature_min,temperature_max,precipitation_sum,snow_depth
 1990-01-01,-9.5,4.8,0.0,0.0
 1990-01-02,-9.0,6.0,0.0,0.0
 1990-01-03,-8.2,3.8,0.0,0.0

@@ -74,28 +74,28 @@ def process_meteostat_data(file_path):
     
     return df
 
-def compile_meteostat_data(resort_name, raw_data_dir, compiled_csv_path):
+def compile_meteostat_data(resort_name, data_df, compiled_csv_path):
     """
     Compile the downloaded Meteostat CSV data for the resort.
     
     Parameters:
     - resort_name (str): Name of the resort.
-    - raw_data_dir (str): Directory containing the downloaded CSV file.
+    - data_df (pd.DataFrame): The downloaded weather data DataFrame.
     - compiled_csv_path (str): Path to save the compiled CSV file.
     
     Returns:
     - None
     """
-    # Define the raw data file path
-    file_name = f"{resort_name.replace('/', '_')}_1990_2023.csv"  # Adjust years as needed
-    file_path = os.path.join(raw_data_dir, file_name)
+    if data_df.empty:
+        print(f"No data to compile for {resort_name}.")
+        return
     
-    if os.path.exists(file_path):
-        print(f"Processing data for {resort_name}...")
-        df = process_meteostat_data(file_path)
-        
-        # Save the processed data (overwrite the existing file for a single copy)
-        df.to_csv(compiled_csv_path, index=False)
-        print(f"Compiled data saved to {compiled_csv_path}.")
-    else:
-        print(f"File {file_name} not found for {resort_name}.")
+    print(f"Processing data for {resort_name}...")
+    
+    # Standardize columns
+    processed_df = standardize_columns(data_df)
+    
+    # Save the processed DataFrame to CSV
+    os.makedirs(os.path.dirname(compiled_csv_path), exist_ok=True)
+    processed_df.to_csv(compiled_csv_path, index=False)
+    print(f"Compiled data saved to {compiled_csv_path}.")
