@@ -10,7 +10,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 
 class TestModelTrainingFunctions(unittest.TestCase):
     @patch('src.models.model_training.RandomizedSearchCV')
-    def test_train_random_forest(self, mock_random_search):
+    def test_train_model(self, mock_random_search):
         # Mocking the RandomizedSearchCV
         mock_estimator = MagicMock(spec=RandomForestRegressor)
         mock_random_search.return_value.best_estimator_ = mock_estimator
@@ -33,7 +33,7 @@ class TestModelTrainingFunctions(unittest.TestCase):
         }
         
         # Call the function
-        best_estimator, best_params = train_random_forest(
+        best_estimator, best_params = train_model(
             X_train=X_train,
             y_train=y_train,
             param_dist=param_dist,
