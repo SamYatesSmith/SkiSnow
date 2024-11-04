@@ -1,7 +1,7 @@
 # Ski Snow Depth Predictor
 
 ## Project Overview
-The **Ski Snow Depth Predictor** is a data-driven application designed to assist skiers in selecting the best resorts and months for skiing based on predicted snow depth. This application serves as a valuable tool for users interested in optimizing their ski trips by leveraging machine learning and historical weather data. The project provides insight into snow depth across multiple resorts in the Alps, helping users make data-driven decisions about their ski plans.
+The **Ski Snow Depth Predictor** provides skiers with predictive insights on snow depth across various resorts in the Alps. By leveraging historical weather data and machine learning, the tool forecasts snow depth, assisting users in choosing ideal skiing conditions based on specific months, countries, and resorts.
 
 ## Table of Contents
 - [Project Overview](#project-overview)
@@ -48,48 +48,43 @@ The project addresses these business requirements with the following data visual
 **Conclusion**: Hypotheses were validated through data analysis and correlation measures, offering valuable insights to stakeholders.
 
 ## Machine Learning Model
+A **Linear Regression Model** is employed to predict snow depth based on historical monthly weather data:
 
-The model is a **Linear Regression model** designed to predict snow depth based on weather attributes. Key steps include:
+- **Features**:
+  - **Month**: One-hot encoded for categorical representation.
+  - **Temperature Average and Precipitation Sum**: Used as continuous predictors.
+  - **Country and Resort**: Represented categorically for location-specific insights.
 
-- **Feature Engineering**: Added temperature average, precipitation sum, and month, country, and resort encoding.
-- **Preprocessing Pipeline**: `StandardScaler` for numeric scaling and `OneHotEncoder` for categorical encoding.
-- **Model Training and Hyperparameter Tuning**: Implemented hyperparameter tuning with cross-validation to optimize performance.
+- **Pipeline Steps**:
+  - **Preprocessing**: Categorical features are one-hot encoded, while continuous features are scaled.
+  - **Training**: Linear regression on training data with an evaluation on both validation and test sets.
 
-### Pipeline Components:
-- **Preprocessor**: Encodes categorical variables and scales numeric ones.
-- **Predictor**: Linear regression model.
-- **Deployment**: The model and pipeline are saved and loaded via `pickle` for real-time predictions on Streamlit.
-
-### Performance Metrics:
-- **MAE**: Mean Absolute Error for validation and test sets.
-- **RMSE**: Root Mean Squared Error for model precision.
-- **R2 Score**: Model's accuracy in explaining the variance.
-
-**Note**: Model outputs align with stakeholder requirements, meeting accuracy and performance thresholds.
+The model outputs predictions based on resort, month, and selected region within the Alps, assisting users in selecting optimal skiing locations.
 
 ## Data Collection and Processing
 
-### Data Source
-Collected from Meteostat, the data spans historical weather details and resort information, including temperature, precipitation, and snow depth.
+### Sources
+Data is sourced from **Meteostat**, covering weather metrics across resorts in the Alps from 1990 onwards. Relevant columns include `time`, `temperature_min`, `temperature_max`, `precipitation_sum`, and `snow_depth`.
 
-### Data Cleaning and Transformation:
-- **Handling Null Values**: Imputation and removal based on data integrity checks.
-- **Feature Engineering**: Aggregated and processed features like average temperature, creating lag features, and encoded categorical variables.
+### Processing Pipeline
+- **Cleaning**: Raw data undergoes standardization, filling missing values with the mean, and categorical encoding.
+- **VIF Calculation**: To address multicollinearity, features with high Variance Inflation Factor (VIF) values are iteratively removed.
+- **Residual Analysis**: Plots are generated to assess model residuals, helping identify biases or prediction anomalies.
 
-### Data Storage:
-- Cleaned and organized in a structured `dashboard_data.csv` file, adhering to CRISP-DM standards.
+Data transformations are handled using the `src/data` and `src/features` modules, with utility functions for saving, loading, and logging.
 
 ## User Interface Design
+The **Streamlit** dashboard features a user-friendly interface:
 
-The dashboard is built with **Streamlit**, offering an interactive, responsive, and accessible user experience. Key features include:
-
-### Dashboard Pages:
-- **Home**: Overview and user guide.
-- **Data Analysis**: Snow depth visualizations and correlation heatmaps.
-- **Predictive Conditions by Resort**: Users select specific resorts and receive month-by-month snow depth predictions.
-- **Predictive Conditions by Country**: Average snow depths across countries for a selected month.
-- **Project Evaluation**: Residual analysis and model evaluation metrics.
-- **About**: Project background, technologies used, and contributor details.
+- **Home Page**: Introduction to the project and usage guidelines.
+- **The Model**: Model explanation and interactive prediction based on user selections (resort, month, etc.).
+- **Data Analysis**: Visual exploratory data analysis (EDA), including:
+  - Snow depth distributions
+  - Correlation heatmap for key features
+  - Snow depth trends across months and countries
+- **Predictive Conditions by Resort/Country**: Predict snow depths by selected resort or average snow depths by country.
+- **Project Evaluation**: Model performance metrics, feature importance, and residual analysis plots.
+- **About**: Information on project contributors and contact details.
 
 ### Design Principles:
 - **Hierarchy and Consistency**: Clear visual hierarchy, structured layout, and a coherent color scheme enhance navigation.
@@ -97,29 +92,38 @@ The dashboard is built with **Streamlit**, offering an interactive, responsive, 
 - **Interactive Components**: Widgets, selection boxes, and tooltips provide a smooth user experience.
 
 ## Model Evaluation and Performance
+Model performance is evaluated using:
 
-The model was assessed on both validation and test datasets, with visualizations in the project evaluation section:
+- **Mean Absolute Error (MAE)**
+- **Root Mean Squared Error (RMSE)**
+- **Mean Absolute Percentage Error (MAPE)** (with adjustments for cases with zero values in `y_true`)
 
-- **Residual Analysis**: Visual residuals and error distribution.
-- **Feature Importance**: (Optional) Feature ranking based on the model's regression coefficients.
-- **Conclusions**: The model performs well within the set accuracy range, meeting project requirements.
+Residual analysis functions generate plots showing residual distributions and residuals versus predictions, helping visualize model errors. The `src/models/residual_analysis.py` file provides tools for in-depth evaluation.
 
 ## Technical Architecture
+This project is structured in a modular format with dedicated scripts for data processing, model training, evaluation, and visualization:
 
-### File Structure
-- `src/`: Contains code for data processing, modeling, and evaluation.
-- `data/`: Data handling and preprocessing scripts.
-- `models/`: Model training and evaluation scripts.
-- `residual_analysis.py`: Analyzes residuals for model validation.
-- `data/`: Stores raw and processed data, including `dashboard_data.csv`.
-- `dashboard.py`: Main Streamlit application for deployment.
+- **dashboard.py**: Primary dashboard script for Streamlit, implementing navigation, model loading, and data visualizations.
+- **src/data**: Data collection, cleaning, and saving scripts.
+- **src/features**: Feature engineering and anomaly detection.
+- **src/models**: Model training, evaluation, and residual analysis.
+- **src/eda**: Statistical analysis and visualization.
 
-### Main Technologies
-- **Python**: Core programming language.
-- **Streamlit**: Dashboard framework.
-- **scikit-learn**: Model development and preprocessing.
-- **Pandas & NumPy**: Data handling and manipulation.
-- **Matplotlib & Seaborn**: Data visualization.
+Logging is set up through `src/models/utils.py` to track the processing pipeline, including model and data-saving checkpoints.
+
+## Main Technologies
+
+- **Python**: The primary programming language for implementing data processing, machine learning models, and deployment. Python’s flexibility enables seamless integration across the various modules within the project.
+
+- **Streamlit**: Used to build an interactive, user-friendly dashboard, allowing users to navigate through different sections, make selections, and view predictions. Streamlit facilitates rapid prototyping and real-time visualization of the model’s outputs.
+
+- **scikit-learn**: Powers the machine learning aspects, including model training, evaluation, and preprocessing. scikit-learn’s robust set of tools for feature engineering, regression modeling, and metric calculations enables efficient experimentation and validation.
+
+- **Pandas & NumPy**: Essential for data manipulation and numerical computation. Pandas handles complex data operations like merging, cleaning, and aggregation, while NumPy enhances speed and efficiency in handling numerical data, especially within the model training pipeline.
+
+- **Matplotlib & Seaborn**: Provide comprehensive data visualization capabilities. Matplotlib and Seaborn are used extensively for visual exploratory data analysis (EDA) in the dashboard, creating histograms, heatmaps, line plots, and bar charts. These visualizations help users interpret snow depth trends, feature correlations, and model performance metrics.
+
+- **Statsmodels**: Used specifically for calculating Variance Inflation Factor (VIF), ensuring features are not collinear and optimizing the model for reliability and interpretability.
 
 ## Project Insights and Conclusions
 
