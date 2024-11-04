@@ -1,12 +1,13 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
+import numpy as np
 from .utils import logger
 import logging
 
 logger = logging.getLogger(__name__)
 
-def plot_residuals(y_true, y_pred, dataset_name, save_dir):
+def plot_residuals(y_true, y_pred, residuals, dataset_name, save_dir):
     """
     Plots residuals vs predicted values and histogram of residuals.
 
@@ -57,15 +58,26 @@ def perform_residual_analysis(model, X, y, dataset_name, save_dir):
     - dataset_name (str): Name of the dataset (e.g., 'Validation', 'Test').
     - save_dir (str): Directory to save the plots.
     """
-    # Predict on log scale
-    y_pred_log = model.predict(X)
-
-    # Inverse transform predictions and true values
-    y_true = np.expm1(y_log)
-    y_pred = np.expm1(y_pred_log)
+    # Predict on original scale
+    y_pred = model.predict(X)
 
     # Calculate residuals
-    residuals = y_true - y_pred
+    residuals = y - y_pred
 
-    # Proceed with plotting residuals using y_true, y_pred, and residuals
+    # Handle potential NaNs/Infs in residuals
+    valid_mask = (~np.isnan(residuals)) & (~np.isinf(residuals))
+    if not valid_mask.all():
+        num_invalid = (~valid_mask).sum()
+        logger.warning(f"Found {num_invalid} invalid residual(s) in {dataset_name} Set. These will be excluded from plots.")
+        y_true = y[valid_mask]
+        y_pred = y_pred[valid_mask]
+        residuals = residuals[valid_mask]
+    else:
+        y_true = y
+        y_pred = y_pred
+
+    # Ensure save_dir exists
+    os.makedirs(save_dir, exist_ok=True)
+
+    # Plot residuals using the corrected function signature
     plot_residuals(y_true, y_pred, residuals, dataset_name, save_dir)
