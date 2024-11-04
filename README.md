@@ -146,9 +146,8 @@ Deployed on **Heroku** using Streamlit, with all necessary files (`requirements.
 
 ## File Structure
 
-"""
-.
-├── app
+```
+
 ├── dashboard.py
 ├── data
 │   ├── external
@@ -271,7 +270,8 @@ Deployed on **Heroku** using Streamlit, with all necessary files (`requirements.
     ├── test_statistical_analysis.py
     ├── test_utils.py
     └── test_visualization.py
-"""
+    
+```
 
 ## Installation and Usage
 
