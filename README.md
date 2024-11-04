@@ -9,6 +9,7 @@ The **Ski Snow Depth Predictor** provides skiers with predictive insights on sno
 - [Hypotheses](#hypotheses)
 - [Machine Learning Model](#machine-learning-model)
 - [Data Collection and Processing](#data-collection-and-processing)
+- [Raw Data Compression and Decompression Process](#raw-data-compression-and-decompression-process)
 - [User Interface Design](#user-interface-design)
 - [Model Evaluation and Performance](#model-evaluation-and-performance)
 - [Technical Architecture](#technical-architecture)
@@ -72,6 +73,39 @@ Data is sourced from **Meteostat**, covering weather metrics across resorts in t
 - **Residual Analysis**: Plots are generated to assess model residuals, helping identify biases or prediction anomalies.
 
 Data transformations are handled using the `src/data` and `src/features` modules, with utility functions for saving, loading, and logging.
+
+## Raw Data Compression and Decompression Process
+
+### Overview
+To manage the project’s size within Heroku’s deployment limits, the raw data files in `data/raw` are compressed into a single archive file, `data/raw.tar.gz`. This archive format significantly reduces the storage requirements, ensuring the project remains lightweight for deployment, while still retaining all the original data structure for local development and educational review.
+
+### Why Compress the Raw Data?
+The raw data is only needed for data preprocessing and is not required for the core functionality of the app itself. By compressing `data/raw`:
+- We reduce the project’s deployment size on Heroku, allowing it to fit within the 500 MB slug size limit.
+- We retain access to the raw data when needed, as the project decompresses the archive automatically on first run.
+
+### Decompression Process
+When the app or development code is executed, it checks if the `data/raw` folder exists. If it does not, the archive `data/raw.tar.gz` is automatically decompressed, restoring the original `data/raw` structure. This is managed within the `fetch_data.py` script.
+
+### How to Decompress the Data
+If you need to decompress the raw data manually, follow these steps:
+1. Ensure `data/raw.tar.gz` is present in the `data` directory.
+2. Run the following code to decompress the archive:
+   ```python
+   import os
+   import tarfile
+
+   # Path to the raw data directory and compressed file
+   raw_data_dir = 'data/raw'
+   compressed_data_file = 'data/raw.tar.gz'
+
+   # Check if the raw data directory exists
+   if not os.path.exists(raw_data_dir):
+       # If not, decompress the tar.gz file
+       print("Extracting raw data...")
+       with tarfile.open(compressed_data_file, 'r:gz') as tar:
+           tar.extractall(path='data')
+       print("Extraction complete.")
 
 ## User Interface Design
 The **Streamlit** dashboard features a user-friendly interface:
