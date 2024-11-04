@@ -162,4 +162,4 @@ cython_debug/
 #.idea/
 
 #RAW DATA REMOVAL TO ACQUIESCE TO HEROKU 500MB FILE SIZE LIMIT
-
+data/raw
