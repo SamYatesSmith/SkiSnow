@@ -5,9 +5,21 @@ from datetime import datetime
 import time
 import numpy as np
 import sys
+import tarfile
 
 # Import existing processing functions
 from src.data.processing import normalize_name, standardize_columns
+
+# Path to the raw data directory and compressed file
+raw_data_dir = 'data/raw'
+compressed_data_file = 'data/raw.tar.gz'
+
+# Check if the raw data directory exists
+if not os.path.exists(raw_data_dir) and os.path.exists(compressed_data_file):
+    print("Extracting raw data...")
+    with tarfile.open(compressed_data_file, 'r:gz') as tar:
+        tar.extractall(path='data')
+    print("Extraction complete.")
 
 def get_nearest_station(latitude, longitude, start_year, end_year):
     """
