@@ -270,13 +270,13 @@ Deployed on **Heroku** using Streamlit, with all necessary files (`requirements.
     ├── test_statistical_analysis.py
     ├── test_utils.py
     └── test_visualization.py
-    
+
 ```
 
 ## Installation and Usage
 
 1. Clone the repository
- - git clone https://github.com/yourusername/SkiSnow.git
+ - git clone https://github.com/SamYatesSmith/SkiSnow.git
  - cd SkiSnow
 2. Install dependencies:
  - pip install -r requirements.txt
