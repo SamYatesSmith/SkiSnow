@@ -1,5 +1,3 @@
-# src/models/utils.py
-
 import os
 import sys
 import joblib
@@ -17,7 +15,7 @@ def setup_logging():
     Ensures that the 'logs' directory exists relative to the project root.
     """
     # Determine the project root directory relative to this file
-    project_root = Path(__file__).resolve().parents[2]  # Adjust the number if your structure is different
+    project_root = Path(__file__).resolve().parents[2]
 
     # Define the logs directory path
     logs_dir = project_root / 'logs' / 'modeling'

@@ -50,14 +50,14 @@ class TestModelTrainingFunctions(unittest.TestCase):
     
     def test_evaluate_model(self):
         # Sample data
-        X = pd.DataFrame({'feature1': [1, 2, 3, 4]})  # Correct feature matrix
+        X = pd.DataFrame({'feature1': [1, 2, 3, 4]})
         y_true = pd.Series([10, 20, 30, 40])
-        y_pred = np.array([12, 18, 33, 37])  # Real array-like predictions
+        y_pred = np.array([12, 18, 33, 37])
         dataset_name = "Validation"
         
         # Initialize a mock model
         mock_model = MagicMock()
-        mock_model.predict.return_value = y_pred  # Mock the predict method
+        mock_model.predict.return_value = y_pred
         
         # Call the function
         metrics = evaluate_model(mock_model, X, y_true, dataset_name=dataset_name)

@@ -18,8 +18,7 @@ def aggregate_dashboard_data(processed_cds_dir, output_file):
         'Austrian Alps': 'Austria',
         'Italian Alps': 'Italy',
         'Slovenian Alps': 'Slovenia',
-        'Swiss Alps': 'Switzerland',
-        # Add other mappings as necessary
+        'Swiss Alps': 'Switzerland'
     }
 
     # Initialize an empty list to hold individual DataFrames
@@ -60,7 +59,7 @@ def aggregate_dashboard_data(processed_cds_dir, output_file):
                             missing_countries = df['country'].isna().sum()
                             if missing_countries > 0:
                                 print(f"Missing country mapping for 'alps' in {file}.")
-                                df['country'].fillna('Unknown', inplace=True)  # Or handle as appropriate
+                                df['country'].fillna('Unknown', inplace=True)
                             
                             # Append the DataFrame to the list
                             df_list.append(df)
@@ -80,13 +79,10 @@ def aggregate_dashboard_data(processed_cds_dir, output_file):
         # Handle missing 'temperature_avg' values
         if dashboard_df['temperature_avg'].isnull().sum() > 0:
             print(f"Found {dashboard_df['temperature_avg'].isnull().sum()} missing 'temperature_avg' values.")
-            # Decide on a strategy: drop, fill with mean/median, etc.
-            # Example: Fill missing 'temperature_avg' with the mean temperature
             mean_temp_avg = dashboard_df['temperature_avg'].mean()
             dashboard_df['temperature_avg'].fillna(mean_temp_avg, inplace=True)
             print(f"Filled missing 'temperature_avg' with mean value: {mean_temp_avg:.2f}")
         
-        # Optional: Drop rows where 'month' could not be extracted
         initial_row_count = len(dashboard_df)
         dashboard_df.dropna(subset=['month'], inplace=True)
         final_row_count = len(dashboard_df)

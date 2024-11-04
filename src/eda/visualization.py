@@ -4,7 +4,7 @@ import seaborn as sns
 from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.graphics.tsaplots import plot_acf
 
-sns.set(style="whitegrid")  # Set a clean theme for seaborn
+sns.set(style="whitegrid")
 
 def plot_boxplot(df: pd.DataFrame, x: str, y: str, title: str, xlabel: str, ylabel: str, rotation: int = 45):
     """
