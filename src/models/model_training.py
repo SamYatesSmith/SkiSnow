@@ -151,7 +151,7 @@ def train_and_save_model():
     print(f"R-squared: {r2_test_lr:.2f}")
     
     # Save the trained Linear Regression model
-    model_save_path_lr = os.path.join(model_save_dir, 'linear_regression_model.pkl')
+    model_save_path_lr = os.path.join(model_save_dir, 'linear_regression_model.joblib')
     save_model(lr, model_save_path_lr)
     
     # Save the split datasets using utils.py

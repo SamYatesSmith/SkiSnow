@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import pickle
+import joblib
 import os
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -27,7 +27,7 @@ st.set_page_config(
 # -----------------------------------------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(BASE_DIR, 'src', 'models')
-MODEL_FILE = 'linear_regression_model.pkl'
+MODEL_FILE = 'linear_regression_model.joblib'
 DASHBOARD_DATA_DIR = os.path.join(BASE_DIR, 'data', 'processed', 'cds')
 DASHBOARD_DATA_FILE = 'dashboard_data.csv'
 
@@ -44,8 +44,8 @@ def load_model(model_filename):
     if not os.path.exists(model_path):
         st.error(f"Model file not found at: {model_path}")
         st.stop()
-    with open(model_path, 'rb') as file:
-        model = pickle.load(file)
+    # Use joblib to load the model
+    model = joblib.load(model_path)
     return model
 
 @st.cache_data

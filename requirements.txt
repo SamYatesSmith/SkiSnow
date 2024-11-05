@@ -27,6 +27,7 @@ meteostat==1.6.8
 multiurl==0.3.1
 narwhals==1.12.1
 netCDF4==1.7.1.post2
+numba==0.60.0
 numpy==2.0.2
 pandas==2.2.3
 patsy==0.5.6
