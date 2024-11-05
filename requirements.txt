@@ -28,7 +28,6 @@ multiurl==0.3.1
 narwhals==1.12.1
 netCDF4==1.7.1.post2
 numpy==2.0.2
-nvidia-nccl-cu12==2.23.4
 pandas==2.2.3
 patsy==0.5.6
 pillow==10.4.0
@@ -59,4 +58,3 @@ urllib3==2.2.3
 watchdog==5.0.3
 widgetsnbextension==4.0.13
 xarray==2024.9.0
-xgboost==2.1.2
