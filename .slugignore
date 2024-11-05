@@ -1,7 +1,6 @@
 notebooks/
 .git/
 tests/
-*.csv
 *.pyc
 __pycache__/
 .pytest_cache/
