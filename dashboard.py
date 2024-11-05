@@ -16,6 +16,7 @@ from sklearn.compose import ColumnTransformer
 # -----------------------------------------------------------
 # Page Configuration
 # -----------------------------------------------------------
+
 st.set_page_config(
     page_title="❄️ Ski Snow Depth Predictor",
     layout="wide",
@@ -25,6 +26,7 @@ st.set_page_config(
 # -----------------------------------------------------------
 # Define Paths
 # -----------------------------------------------------------
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(BASE_DIR, 'src', 'models')
 MODEL_FILE = 'linear_regression_model.joblib'
